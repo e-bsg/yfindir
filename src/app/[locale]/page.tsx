@@ -267,7 +267,7 @@ export default async function HomePage({ params }: Props) {
                     {profile.subscription_tier === 'premium' ? (
                       <Star className="h-3 w-3 text-amber-500" />
                     ) : null}
-                    Verified
+                    <HomeVerifiedBadge />
                   </span>
                   <span className="text-sm font-medium text-primary group-hover:underline">
                     <HomeViewProfile />
@@ -523,7 +523,7 @@ async function HomeViewProfile() {
 
 async function HomeViewAllCompanies() {
   const t = await getTranslations('home');
-  return <>View All Companies</>;
+  return <>{t('view_all_companies')}</>;
 }
 
 async function HomeNoCompanies() {
@@ -578,7 +578,7 @@ async function HomeRecentListings() {
 
 async function HomeRecentListingsSubtitle() {
   const t = await getTranslations('home');
-  return <>Latest opportunities from our industrial network</>;
+  return <>{t('recent_listings_subtitle')}</>;
 }
 
 async function HomeNoListings() {
@@ -594,4 +594,9 @@ async function HomeViewAllListings() {
 async function ListingTypeLabel({ type }: { type: string }) {
   const t = await getTranslations('listings');
   return <>{t(type as any)}</>;
+}
+
+async function HomeVerifiedBadge() {
+  const t = await getTranslations('home');
+  return <>{t('verified_badge')}</>;
 }

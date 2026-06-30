@@ -25,7 +25,8 @@
     "next": "Next",
     "previous": "Previous",
     "required": "Required",
-    "optional": "Optional"
+    "optional": "Optional",
+    "rights_reserved": "All rights reserved."
   },
   "categories": {
     "factory": "Factory / Manufacturer",
@@ -154,6 +155,9 @@
     "why_direct": "Direct Communication",
     "why_direct_desc": "Message companies directly through our built-in messaging system — no intermediaries",
     "why_free": "Free to Join",
-    "why_free_desc": "Create your company profile and start connecting at no cost. Premium features optional"
+    "why_free_desc": "Create your company profile and start connecting at no cost. Premium features optional",
+    "view_all_companies": "View All Companies",
+    "recent_listings_subtitle": "Latest opportunities from our industrial network",
+    "verified_badge": "Verified"
   }
 }
