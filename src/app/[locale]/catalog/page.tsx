@@ -78,14 +78,7 @@ export default async function CatalogPage({ searchParams, params }: Props) {
           {/* Search bar */}
           <form className="relative max-w-xl">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              name="search"
-              defaultValue={sp.search || ''}
-              placeholder=""
-              className="w-full rounded-lg border bg-muted/30 pl-12 pr-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow"
-            />
-            <SearchPlaceholder />
+            <CatalogSearchInput sp={sp} />
           </form>
 
           {/* Category filter pills */}
@@ -275,8 +268,17 @@ async function AllCategories() {
   return <>{t('all_categories')}</>;
 }
 
-async function SearchPlaceholder() {
-  return null;
+async function CatalogSearchInput({ sp }: { sp: { search?: string } }) {
+  const t = await getTranslations('catalog');
+  return (
+    <input
+      type="text"
+      name="search"
+      defaultValue={sp.search || ''}
+      placeholder={t('search_placeholder')}
+      className="w-full rounded-lg border bg-muted/30 pl-12 pr-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow"
+    />
+  );
 }
 
 async function ShowingResults() {

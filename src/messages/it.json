@@ -25,7 +25,8 @@
     "next": "Avanti",
     "previous": "Precedente",
     "required": "Obbligatorio",
-    "optional": "Opzionale"
+    "optional": "Opzionale",
+    "rights_reserved": "Tutti i diritti riservati."
   },
   "categories": {
     "factory": "Fabbrica / Produttore",
@@ -108,7 +109,8 @@
     "yes": "Sì",
     "no": "No",
     "no_details": "Nessun dettaglio sui trasporti fornito",
-    "no_results_hint": "Prova a cercare per paese o città"
+    "no_results_hint": "Prova a cercare per paese o città",
+    "search_placeholder": "Cerca per azienda o paese..."
   },
   "moderation": {
     "approve": "Approva",
@@ -154,6 +156,9 @@
     "why_direct": "Comunicazione Diretta",
     "why_direct_desc": "Invia messaggi direttamente alle aziende tramite il nostro sistema di messaggistica — senza intermediari",
     "why_free": "Iscrizione Gratuita",
-    "why_free_desc": "Crea il profilo della tua azienda e inizia a connetterti senza costi. Funzionalità premium opzionali"
+    "why_free_desc": "Crea il profilo della tua azienda e inizia a connetterti senza costi. Funzionalità premium opzionali",
+    "view_all_companies": "Visualizza Tutte le Aziende",
+    "recent_listings_subtitle": "Ultime opportunità dalla nostra rete industriale",
+    "verified_badge": "Verificato"
   }
 }
