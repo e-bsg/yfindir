@@ -103,7 +103,7 @@ export function Header() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden border-t p-4 bg-background">
+        <div className="md:hidden border-t p-4 bg-background relative z-[60]">
           <nav className="flex flex-col gap-3">
             {links.map((link) => (
               <Link
@@ -116,7 +116,21 @@ export function Header() {
               </Link>
             ))}
             <hr />
-            <LocaleSwitcher currentLocale={locale} currentPath={pathname} />
+            <div className="flex flex-wrap gap-2">
+              {activeLocales.map((loc) => (
+                <Link
+                  key={loc}
+                  href={pathname || '/'}
+                  locale={loc}
+                  onClick={() => setMobileOpen(false)}
+                  className={`rounded border px-3 py-1 text-xs ${
+                    loc === locale ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-accent'
+                  }`}
+                >
+                  {localeNames[loc]}
+                </Link>
+              ))}
+            </div>
             {user ? (
               <>
                 <Link href="/profile/edit" className="text-sm">{t('profile')}</Link>

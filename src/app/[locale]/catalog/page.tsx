@@ -82,7 +82,7 @@ export default async function CatalogPage({ searchParams, params }: Props) {
               type="text"
               name="search"
               defaultValue={sp.search || ''}
-              placeholder={sp.search ? '' : 'Search factories, products, services...'}
+              placeholder=""
               className="w-full rounded-lg border bg-muted/30 pl-12 pr-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow"
             />
             <SearchPlaceholder />

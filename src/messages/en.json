@@ -109,7 +109,8 @@
     "yes": "Yes",
     "no": "No",
     "no_details": "No transport details provided",
-    "no_results_hint": "Try searching by country or city"
+    "no_results_hint": "Try searching by country or city",
+    "search_placeholder": "Search by company or country..."
   },
   "moderation": {
     "approve": "Approve",
