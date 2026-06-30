@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { usePathname } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/client';
@@ -12,12 +12,7 @@ import { Menu, X, Globe } from 'lucide-react';
 export function Header() {
   const t = useTranslations('common');
   const pathname = usePathname();
-  // next-intl's usePathname strips locale prefix for default locale
-  // Get locale from the raw pathname via window or fallback
-  const rawPath = typeof window !== 'undefined' ? window.location.pathname : pathname;
-  const locale = rawPath.split('/')[1] && ['en','el','it','zh','bg','tr'].includes(rawPath.split('/')[1]) 
-    ? rawPath.split('/')[1] 
-    : 'en';
+  const locale = useLocale();
   const [user, setUser] = useState<User | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const supabase = createClient();
