@@ -29,7 +29,7 @@ export default async function AdminPage() {
   const { data: userData } = await supabase.auth.getUser();
 
   const isAdmin =
-    (userData.user?.user_metadata?.role === 'admin') ||
+    (userData.user?.app_metadata?.role === 'super_admin') ||
     (userData.user?.app_metadata?.role === 'admin');
 
   if (!isAdmin) {

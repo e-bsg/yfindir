@@ -21,9 +21,11 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    // Admin check: either role from auth metadata or profile flag
+    // Admin check: super_admin or admin role
     const isAdmin =
-      user.app_metadata?.role === 'admin' || profile?.subscription_tier === 'admin';
+      user.app_metadata?.role === 'super_admin' ||
+      user.app_metadata?.role === 'admin' ||
+      profile?.subscription_tier === 'admin';
 
     if (!isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

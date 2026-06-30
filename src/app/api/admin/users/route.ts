@@ -11,7 +11,7 @@ async function checkAdmin(supabase: Awaited<ReturnType<typeof createServerSupaba
     return { authorized: false, status: 401, user: null };
   }
 
-  const isAdmin = user.app_metadata?.role === 'admin';
+  const isAdmin = user.app_metadata?.role === 'super_admin' || user.app_metadata?.role === 'admin';
   if (!isAdmin) {
     return { authorized: false, status: 403, user: null };
   }

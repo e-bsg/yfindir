@@ -36,8 +36,8 @@ export default async function TransportPage({ searchParams, params }: Props) {
   const supabase = await createServerSupabase();
   const searchTerm = sp.search?.trim() || '';
 
-  // Fetch all transport profiles
-  let query = supabase
+  // Fetch all transport profiles (filtered in-memory to avoid .or() on joined tables)
+  const { data: profiles } = await supabase
     .from('profiles')
     .select('*, transport_details(*)')
     .eq('category', 'transport')
@@ -45,42 +45,27 @@ export default async function TransportPage({ searchParams, params }: Props) {
     .eq('is_blocked', false)
     .order('created_at', { ascending: false });
 
-  // === SEARCH LOGIC ===
+  const allProfiles = (profiles || []) as TransportProfile[];
+
+  // In-memory search (works for joined table columns like countries_served)
+  let transportProfiles = allProfiles;
   if (searchTerm) {
-    const term = searchTerm.toUpperCase();
+    const termLower = searchTerm.toLowerCase();
+    const nameMatches = Object.entries(COUNTRY_NAMES)
+      .filter(([, name]) => name.toLowerCase().includes(termLower))
+      .map(([code]) => code);
 
-    // 1. Exact country code match (cs = contains array element)
-    // 2. Country name match (via ilike on array_to_string)
-    // 3. Company name / city match
-    const countryFilters = `
-      transport_details.countries_served.cs.{${term}},
-      company_name.ilike.%${searchTerm}%,
-      city.ilike.%${searchTerm}%
-    `;
-
-    // Also try matching by country name if the search looks like a name (>2 chars, not just a code)
-    if (searchTerm.length > 2) {
-      // Find matching country codes by name
-      const matchingCodes = Object.entries(COUNTRY_NAMES)
-        .filter(([, name]) => name.toLowerCase().includes(searchTerm.toLowerCase()))
-        .map(([code]) => `transport_details.countries_served.cs.{${code}}`);
-
-      if (matchingCodes.length > 0) {
-        query = query.or(`${matchingCodes.join(',')},${countryFilters}`);
-      } else {
-        query = query.or(countryFilters);
-      }
-    } else {
-      query = query.or(countryFilters);
-    }
+    transportProfiles = allProfiles.filter((p) => {
+      if (p.company_name.toLowerCase().includes(termLower)) return true;
+      if (p.city.toLowerCase().includes(termLower)) return true;
+      const countries = p.transport_details?.countries_served || [];
+      return countries.some(c => c.toUpperCase() === searchTerm.toUpperCase() || nameMatches.includes(c.toUpperCase()));
+    });
   }
 
-  const { data: profiles } = await query;
-  const transportProfiles = (profiles || []) as TransportProfile[];
-
-  // Collect all unique countries from results for autocomplete suggestions
+  // Collect all unique countries for autocomplete
   const activeCountries = new Set<string>();
-  for (const p of transportProfiles) {
+  for (const p of allProfiles) {
     p.transport_details?.countries_served?.forEach(c => activeCountries.add(c));
   }
   const countryOptions = Array.from(activeCountries).sort();

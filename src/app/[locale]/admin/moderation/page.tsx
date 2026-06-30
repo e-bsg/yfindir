@@ -17,7 +17,7 @@ export default async function ModerationPage() {
   }
 
   const { data: userData } = await supabase.auth.getUser();
-  const isAdmin = userData.user?.app_metadata?.role === 'admin';
+  const isAdmin = userData.user?.app_metadata?.role === 'super_admin' || userData.user?.app_metadata?.role === 'admin';
 
   if (!isAdmin) {
     return <Unauthorized />;
