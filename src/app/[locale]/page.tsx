@@ -23,7 +23,23 @@ const FEATURED_UNSPLASH = [
   'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&h=400&fit=crop',
   'https://images.unsplash.com/photo-1565464027197-ca5c4c8b5e6f?w=600&h=400&fit=crop',
   'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1504917597771-1fd029a8d07e?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1586528116311-604f1f0e3b7a?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop',
 ];
+
+function listingBorderColor(type: string) {
+  switch (type) {
+    case 'job_offer':
+      return 'border-l-blue-500';
+    case 'service':
+      return 'border-l-green-500';
+    case 'job_seeking':
+      return 'border-l-amber-500';
+    default:
+      return 'border-l-primary';
+  }
+}
 
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
@@ -48,7 +64,16 @@ export default async function HomePage({ params }: Props) {
   return (
     <div>
       {/* ── Hero ── */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 text-white overflow-hidden">
+      <section
+        className="relative bg-cover bg-center text-white overflow-hidden"
+        style={{
+          backgroundImage:
+            'url(https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&h=800&fit=crop)',
+        }}
+      >
+        {/* Dark gradient overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-900/85 to-blue-950/90" />
+
         {/* Dot pattern overlay */}
         <div
           className="absolute inset-0 opacity-[0.06]"
@@ -113,22 +138,22 @@ export default async function HomePage({ params }: Props) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <WhyCard
-            icon={<Shield className="h-8 w-8" />}
+            icon={<Shield className="h-10 w-10" />}
             title={<HomeWhyVerified />}
             desc={<HomeWhyVerifiedDesc />}
           />
           <WhyCard
-            icon={<Globe className="h-8 w-8" />}
+            icon={<Globe className="h-10 w-10" />}
             title={<HomeWhyGlobal />}
             desc={<HomeWhyGlobalDesc />}
           />
           <WhyCard
-            icon={<MessageSquare className="h-8 w-8" />}
+            icon={<MessageSquare className="h-10 w-10" />}
             title={<HomeWhyDirect />}
             desc={<HomeWhyDirectDesc />}
           />
           <WhyCard
-            icon={<Zap className="h-8 w-8" />}
+            icon={<Zap className="h-10 w-10" />}
             title={<HomeWhyFree />}
             desc={<HomeWhyFreeDesc />}
           />
@@ -291,7 +316,7 @@ export default async function HomePage({ params }: Props) {
               <Link
                 key={listing.id}
                 href="/listings"
-                className="group rounded-xl border bg-card overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 hover:-translate-y-0.5"
+                className={`group rounded-xl border border-l-4 bg-card overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 hover:-translate-y-0.5 ${listingBorderColor(listing.type)}`}
               >
                 {/* Card header with listing type badge overlay */}
                 <div className="relative overflow-hidden">
@@ -364,7 +389,7 @@ function WhyCard({
   desc: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center text-center rounded-2xl border bg-card p-8 hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+    <div className="flex flex-col items-center text-center rounded-2xl border bg-card p-8 hover:shadow-lg hover:border-primary/20 transition-all duration-300 hover:-translate-y-1">
       <div className="mb-5 rounded-full bg-primary/10 p-4 text-primary">
         {icon}
       </div>
