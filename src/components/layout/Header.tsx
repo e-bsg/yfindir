@@ -1,9 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { usePathname } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
@@ -11,14 +10,37 @@ import { cn } from '@/lib/utils';
 import { Menu, X } from 'lucide-react';
 
 const VALID_LOCALES = ['en', 'el', 'it', 'zh', 'bg', 'tr'];
+const DEFAULT_LOCALE = 'en';
+
+const localeFlags: Record<string, string> = {
+  en: '🇬🇧', el: '🇬🇷', it: '🇮🇹', zh: '🇨🇳', bg: '🇧🇬', tr: '🇹🇷',
+};
+const localeNames: Record<string, string> = {
+  en: 'English', el: 'Ελληνικά', it: 'Italiano',
+  zh: '中文', bg: 'Български', tr: 'Türkçe',
+};
+const localeCodes: Record<string, string> = {
+  en: 'EN', el: 'EL', it: 'IT', zh: 'ZH', bg: 'BG', tr: 'TR',
+};
+const activeLocales = ['en', 'el', 'it'];
+
+function localeUrl(currentRawPath: string, targetLocale: string): string {
+  // Strip current locale prefix from path, then add target locale if not default
+  const segments = currentRawPath.split('/').filter(Boolean);
+  if (VALID_LOCALES.includes(segments[0])) segments.shift();
+  const cleanPath = '/' + segments.join('/');
+  if (targetLocale === DEFAULT_LOCALE) return cleanPath || '/';
+  return `/${targetLocale}${cleanPath === '/' ? '' : cleanPath}`;
+}
 
 export function Header() {
   const t = useTranslations('common');
-  const pathname = usePathname();
   const params = useParams();
+  const rawPathname = usePathname(); // full path from next/navigation
   const locale = (params?.locale as string) && VALID_LOCALES.includes(params.locale as string)
     ? (params.locale as string)
-    : 'en';
+    : DEFAULT_LOCALE;
+
   const [user, setUser] = useState<User | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const supabase = createClient();
@@ -54,7 +76,7 @@ export function Header() {
               href={link.href}
               className={cn(
                 'text-sm font-medium transition-colors hover:text-primary',
-                pathname.includes(link.href) ? 'text-primary' : 'text-muted-foreground'
+                rawPathname.includes(link.href) ? 'text-primary' : 'text-muted-foreground'
               )}
             >
               {link.label}
@@ -63,7 +85,7 @@ export function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <LocaleSwitcher currentLocale={locale} currentPath={pathname} />
+          <LocaleSwitcher currentLocale={locale} rawPath={rawPathname} />
           {user ? (
             <div className="flex items-center gap-2">
               <Link href="/messages" className="text-sm text-muted-foreground hover:text-primary">
@@ -123,24 +145,23 @@ export function Header() {
             ))}
             <hr />
             <div className="flex flex-wrap gap-2">
-              {[locale, ...activeLocales.filter(l => l !== locale)].map((loc) => (
+              {[locale, ...activeLocales.filter(l => l !== locale)].map((loc) =>
                 loc === locale ? (
                   <span key={loc} className="rounded border px-3 py-1 text-xs bg-primary text-primary-foreground border-primary">
                     {localeFlags[loc]} {localeCodes[loc]}
                   </span>
                 ) : (
-                  <Link
+                  <a
                     key={loc}
-                    href={pathname || '/'}
-                    locale={loc}
+                    href={localeUrl(rawPathname, loc)}
                     onClick={() => setMobileOpen(false)}
                     className="rounded border px-3 py-1 text-xs hover:bg-accent"
                     title={localeNames[loc]}
                   >
                     {localeFlags[loc]} {localeCodes[loc]}
-                  </Link>
+                  </a>
                 )
-              ))}
+              )}
             </div>
             {user ? (
               <>
@@ -169,19 +190,7 @@ export function Header() {
   );
 }
 
-const localeFlags: Record<string, string> = {
-  en: '🇬🇧', el: '🇬🇷', it: '🇮🇹', zh: '🇨🇳', bg: '🇧🇬', tr: '🇹🇷',
-};
-const localeNames: Record<string, string> = {
-  en: 'English', el: 'Ελληνικά', it: 'Italiano',
-  zh: '中文', bg: 'Български', tr: 'Türkçe',
-};
-const localeCodes: Record<string, string> = {
-  en: 'EN', el: 'EL', it: 'IT', zh: 'ZH', bg: 'BG', tr: 'TR',
-};
-const activeLocales = ['en', 'el', 'it'];
-
-function LocaleSwitcher({ currentLocale, currentPath }: { currentLocale: string; currentPath?: string }) {
+function LocaleSwitcher({ currentLocale, rawPath }: { currentLocale: string; rawPath: string }) {
   const [open, setOpen] = useState(false);
   const sorted = [currentLocale, ...activeLocales.filter(l => l !== currentLocale)];
 
@@ -210,10 +219,9 @@ function LocaleSwitcher({ currentLocale, currentPath }: { currentLocale: string;
                   <span>{localeNames[loc]}</span>
                 </span>
               ) : (
-                <Link
+                <a
                   key={loc}
-                  href={currentPath || '/'}
-                  locale={loc}
+                  href={localeUrl(rawPath, loc)}
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-muted-foreground hover:bg-accent"
                   title={localeNames[loc]}
@@ -221,7 +229,7 @@ function LocaleSwitcher({ currentLocale, currentPath }: { currentLocale: string;
                   <span className="text-xs opacity-0">✓</span>
                   <span className="text-base">{localeFlags[loc]}</span>
                   <span>{localeNames[loc]}</span>
-                </Link>
+                </a>
               )
             )}
           </div>
