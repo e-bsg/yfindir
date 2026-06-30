@@ -153,20 +153,41 @@ const localeNames: Record<string, string> = {
   tr: 'Türkçe',
 };
 
+const activeLocales = ['en', 'el', 'it'];
+
 function LocaleSwitcher({ currentLocale, currentPath }: { currentLocale: string; currentPath?: string }) {
-  const nextLocale = currentLocale === 'en' ? 'el' : 'en';
-  const label = localeNames[nextLocale] || nextLocale.toUpperCase();
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex items-center gap-1">
-      <Link
-        href={currentPath || '/'}
-        locale={nextLocale}
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
         className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
       >
         <Globe className="h-4 w-4" />
-        <span>{label}</span>
-      </Link>
+        <span>{localeNames[currentLocale] || currentLocale.toUpperCase()}</span>
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-2 z-50 min-w-[140px] rounded-md border bg-background p-1 shadow-lg">
+            {activeLocales.map((loc) => (
+              <Link
+                key={loc}
+                href={currentPath || '/'}
+                locale={loc}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2 rounded-sm px-3 py-2 text-sm hover:bg-accent ${
+                  loc === currentLocale ? 'font-medium text-primary' : 'text-muted-foreground'
+                }`}
+              >
+                {loc === currentLocale && <span className="text-xs">✓</span>}
+                <span className={loc === currentLocale ? '' : 'ml-4'}>{localeNames[loc]}</span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
