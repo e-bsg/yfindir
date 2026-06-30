@@ -1,10 +1,11 @@
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase/server';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { Shield, Users, FileText, Clock } from 'lucide-react';
+import { Shield, Users, FileText, Clock, Settings } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import type { Profile, Listing, DbUser } from '@/lib/types';
+import { AdminSettings } from '@/components/admin/AdminSettings';
 
 export default async function AdminPage() {
   const supabase = await createServerSupabase();
@@ -192,6 +193,10 @@ export default async function AdminPage() {
             <NoPendingListings />
           </p>
         )}
+      </section>
+
+      <section className="mt-10">
+        <AdminSettings />
       </section>
     </div>
   );

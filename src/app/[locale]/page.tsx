@@ -53,13 +53,32 @@ export default async function HomePage({ params }: Props) {
     .limit(6)
     .order('created_at', { ascending: false });
 
-  const { data: listings } = await supabase
+  // Read max listings per category setting (default: 2)
+  let maxPerCategory = 2;
+  try {
+    const { data: setting } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'homepage.max_listings_per_category')
+      .single();
+    if (setting?.value) maxPerCategory = parseInt(setting.value, 10) || 2;
+  } catch { /* table may not exist yet, use default */ }
+
+  // Fetch listings, then deduplicate by category up to maxPerCategory each
+  const { data: allListings } = await supabase
     .from('listings')
     .select('*, profiles(*)')
     .eq('is_moderated', true)
     .eq('is_active', true)
-    .limit(4)
+    .limit(20)
     .order('created_at', { ascending: false });
+
+  // Deduplicate: max N per type
+  const typeCounts: Record<string, number> = {};
+  const listings = (allListings || []).filter((l) => {
+    typeCounts[l.type] = (typeCounts[l.type] || 0) + 1;
+    return typeCounts[l.type] <= maxPerCategory;
+  }).slice(0, 8);
 
   return (
     <div>
