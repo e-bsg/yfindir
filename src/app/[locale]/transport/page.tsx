@@ -3,7 +3,7 @@ import { Link } from '@/i18n/routing';
 import { createServerSupabase } from '@/lib/supabase/server';
 import type { Profile, TransportDetails } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Truck, Globe, Snowflake, AlertTriangle } from 'lucide-react';
+import { Truck, Globe, Snowflake, AlertTriangle, Search } from 'lucide-react';
 
 type TransportProfile = Profile & { transport_details: TransportDetails | null };
 
@@ -12,10 +12,31 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
+// ISO 3166-1 alpha-2 to English name
+const COUNTRY_NAMES: Record<string, string> = {
+  GR: 'Greece', BG: 'Bulgaria', RO: 'Romania', RS: 'Serbia',
+  TR: 'Turkey', IT: 'Italy', HU: 'Hungary', AT: 'Austria',
+  SK: 'Slovakia', MK: 'North Macedonia', AL: 'Albania',
+  DE: 'Germany', FR: 'France', PL: 'Poland', CZ: 'Czech Republic',
+  HR: 'Croatia', SI: 'Slovenia', UA: 'Ukraine', MD: 'Moldova',
+  CN: 'China', US: 'United States', GB: 'United Kingdom',
+  ES: 'Spain', PT: 'Portugal', NL: 'Netherlands', BE: 'Belgium',
+  CH: 'Switzerland', SE: 'Sweden', NO: 'Norway', DK: 'Denmark',
+  FI: 'Finland', EE: 'Estonia', LV: 'Latvia', LT: 'Lithuania',
+  JP: 'Japan', KR: 'South Korea', IN: 'India', AE: 'UAE',
+  EG: 'Egypt', MA: 'Morocco', ZA: 'South Africa', AU: 'Australia',
+};
+
+function countryName(code: string): string {
+  return COUNTRY_NAMES[code.toUpperCase()] || code;
+}
+
 export default async function TransportPage({ searchParams, params }: Props) {
   const [{ locale }, sp] = await Promise.all([params, searchParams]);
   const supabase = await createServerSupabase();
+  const searchTerm = sp.search?.trim() || '';
 
+  // Fetch all transport profiles
   let query = supabase
     .from('profiles')
     .select('*, transport_details(*)')
@@ -24,14 +45,45 @@ export default async function TransportPage({ searchParams, params }: Props) {
     .eq('is_blocked', false)
     .order('created_at', { ascending: false });
 
-  if (sp.search) {
-    query = query.or(
-      `company_name.ilike.%${sp.search}%,city.ilike.%${sp.search}%`
-    );
+  // === SEARCH LOGIC ===
+  if (searchTerm) {
+    const term = searchTerm.toUpperCase();
+
+    // 1. Exact country code match (cs = contains array element)
+    // 2. Country name match (via ilike on array_to_string)
+    // 3. Company name / city match
+    const countryFilters = `
+      transport_details.countries_served.cs.{${term}},
+      company_name.ilike.%${searchTerm}%,
+      city.ilike.%${searchTerm}%
+    `;
+
+    // Also try matching by country name if the search looks like a name (>2 chars, not just a code)
+    if (searchTerm.length > 2) {
+      // Find matching country codes by name
+      const matchingCodes = Object.entries(COUNTRY_NAMES)
+        .filter(([, name]) => name.toLowerCase().includes(searchTerm.toLowerCase()))
+        .map(([code]) => `transport_details.countries_served.cs.{${code}}`);
+
+      if (matchingCodes.length > 0) {
+        query = query.or(`${matchingCodes.join(',')},${countryFilters}`);
+      } else {
+        query = query.or(countryFilters);
+      }
+    } else {
+      query = query.or(countryFilters);
+    }
   }
 
   const { data: profiles } = await query;
   const transportProfiles = (profiles || []) as TransportProfile[];
+
+  // Collect all unique countries from results for autocomplete suggestions
+  const activeCountries = new Set<string>();
+  for (const p of transportProfiles) {
+    p.transport_details?.countries_served?.forEach(c => activeCountries.add(c));
+  }
+  const countryOptions = Array.from(activeCountries).sort();
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-10">
@@ -45,23 +97,45 @@ export default async function TransportPage({ searchParams, params }: Props) {
         </p>
       </div>
 
-      {/* Search */}
+      {/* Search with autocomplete */}
       <div className="mb-8">
         <form className="relative max-w-md">
-          <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             name="search"
-            defaultValue={sp.search || ''}
-            placeholder="Search by company or country..."
+            list="country-suggestions"
+            defaultValue={searchTerm || ''}
+            placeholder={searchTerm ? '' : 'Search by company, country code (GR) or country name (Greece)...'}
+            autoComplete="off"
             className="w-full rounded-md border pl-10 pr-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
+          <datalist id="country-suggestions">
+            {countryOptions.map(code => (
+              <option key={code} value={code}>
+                {countryName(code)}
+              </option>
+            ))}
+            {countryOptions.map(code => (
+              <option key={`name-${code}`} value={countryName(code)} />
+            ))}
+          </datalist>
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => {
+                // Reset by submitting empty form
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <Link href="/transport" className="text-xs">✕</Link>
+            </button>
+          )}
         </form>
 
-        {sp.search && (
+        {searchTerm && (
           <p className="mt-3 text-sm text-muted-foreground">
-            <SearchResults />
-            {transportProfiles.length}
+            <SearchResults count={transportProfiles.length} searchTerm={searchTerm} />
           </p>
         )}
       </div>
@@ -114,12 +188,13 @@ export default async function TransportPage({ searchParams, params }: Props) {
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {td.countries_served.map((country) => (
+                        {td.countries_served.map((code) => (
                           <span
-                            key={country}
-                            className="rounded-full bg-accent px-2 py-0.5 text-xs"
+                            key={code}
+                            title={countryName(code)}
+                            className="rounded-full bg-accent px-2 py-0.5 text-xs cursor-help"
                           >
-                            {country}
+                            {code}
                           </span>
                         ))}
                       </div>
@@ -206,9 +281,8 @@ async function TransportSubtitle() {
   return <>{t('page_subtitle')}</>;
 }
 
-async function SearchResults() {
-  const t = await getTranslations('common');
-  return <>{t('search')}: </>;
+function SearchResults({ count, searchTerm }: { count: number; searchTerm: string }) {
+  return <>{count} result{count !== 1 ? 's' : ''} for &ldquo;{searchTerm}&rdquo;</>;
 }
 
 async function CountriesServedLabel() {
