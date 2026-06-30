@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
@@ -12,7 +12,12 @@ import { Menu, X, Globe } from 'lucide-react';
 export function Header() {
   const t = useTranslations('common');
   const pathname = usePathname();
-  const locale = pathname.split('/')[1] || 'el';
+  // next-intl's usePathname strips locale prefix for default locale
+  // Get locale from the raw pathname via window or fallback
+  const rawPath = typeof window !== 'undefined' ? window.location.pathname : pathname;
+  const locale = rawPath.split('/')[1] && ['en','el','it','zh','bg','tr'].includes(rawPath.split('/')[1]) 
+    ? rawPath.split('/')[1] 
+    : 'en';
   const [user, setUser] = useState<User | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const supabase = createClient();
@@ -57,7 +62,7 @@ export function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <LocaleSwitcher currentLocale={locale} />
+          <LocaleSwitcher currentLocale={locale} currentPath={pathname} />
           {user ? (
             <div className="flex items-center gap-2">
               <Link href="/messages" className="text-sm text-muted-foreground hover:text-primary">
@@ -116,7 +121,7 @@ export function Header() {
               </Link>
             ))}
             <hr />
-            <LocaleSwitcher currentLocale={locale} />
+            <LocaleSwitcher currentLocale={locale} currentPath={pathname} />
             {user ? (
               <>
                 <Link href="/profile/edit" className="text-sm">{t('profile')}</Link>
@@ -153,14 +158,14 @@ const localeNames: Record<string, string> = {
   tr: 'Türkçe',
 };
 
-function LocaleSwitcher({ currentLocale }: { currentLocale: string }) {
+function LocaleSwitcher({ currentLocale, currentPath }: { currentLocale: string; currentPath?: string }) {
   const nextLocale = currentLocale === 'en' ? 'el' : 'en';
   const label = localeNames[nextLocale] || nextLocale.toUpperCase();
 
   return (
     <div className="flex items-center gap-1">
       <Link
-        href="/"
+        href={currentPath || '/'}
         locale={nextLocale}
         className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
       >
