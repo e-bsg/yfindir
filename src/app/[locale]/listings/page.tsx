@@ -145,7 +145,7 @@ export default async function ListingsPage({
                 href={`/profile/${listing.profile_id}`}
                 className="group rounded-xl border bg-card overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col"
               >
-                {/* Card Image */}
+                {/* Card Image with gradient overlay */}
                 <div className="relative h-48 w-full overflow-hidden bg-muted">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -153,27 +153,37 @@ export default async function ListingsPage({
                     alt={localizedTitle}
                     className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  {img.isUnsplash && (
-                    <div className="absolute top-2 right-2 rounded-md bg-background/80 px-2 py-0.5 text-[10px] text-muted-foreground backdrop-blur">
-                      <Image className="inline h-3 w-3 mr-1" />
-                      placeholder
-                    </div>
-                  )}
-                </div>
+                  {/* Dark gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-                {/* Card Content */}
-                <div className="p-5 flex flex-col gap-2 flex-1">
-                  <div className="flex items-center gap-2">
-                    <TypeIcon type={listing.type as ListingType} />
-                    <span className="text-xs font-medium text-primary uppercase tracking-wide">
+                  {/* Type badge overlaid on image */}
+                  <div className="absolute top-3 left-3">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-2.5 py-0.5 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-md">
+                      <TypeIcon type={listing.type as ListingType} />
                       <ListingTypeLabel type={listing.type as ListingType} />
                     </span>
                   </div>
 
-                  <h2 className="font-semibold text-lg leading-snug group-hover:text-primary transition-colors">
-                    {localizedTitle}
-                  </h2>
+                  {img.isUnsplash && (
+                    <div className="absolute top-3 right-3 rounded-md bg-background/80 px-2 py-0.5 text-[10px] text-muted-foreground backdrop-blur">
+                      <Image className="inline h-3 w-3 mr-1" />
+                      placeholder
+                    </div>
+                  )}
 
+                  {/* Title overlaid on image with text shadow */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h2
+                      className="font-semibold text-lg leading-snug text-white drop-shadow-lg"
+                      style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}
+                    >
+                      {localizedTitle}
+                    </h2>
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="p-5 flex flex-col gap-2 flex-1">
                   {listing.profiles && (
                     <p className="text-sm font-medium text-muted-foreground">
                       {listing.profiles.company_name}

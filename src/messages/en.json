@@ -144,6 +144,16 @@
     "stats_countries": "Countries",
     "stats_listings": "Active Listings",
     "cta_register": "Register Your Company",
-    "cta_browse": "Browse Catalog"
+    "cta_browse": "Browse Catalog",
+    "why_choose_us": "Why Choose Yfantis",
+    "why_choose_us_subtitle": "The trusted B2B platform for industrial enterprises worldwide",
+    "why_verified": "Verified Companies",
+    "why_verified_desc": "Every profile is manually reviewed and verified before appearing in our directory",
+    "why_global": "Global Reach",
+    "why_global_desc": "Connect with industrial partners across 30+ countries on every continent",
+    "why_direct": "Direct Communication",
+    "why_direct_desc": "Message companies directly through our built-in messaging system — no intermediaries",
+    "why_free": "Free to Join",
+    "why_free_desc": "Create your company profile and start connecting at no cost. Premium features optional"
   }
 }
